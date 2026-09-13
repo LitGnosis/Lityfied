@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
-  const key = process.env.STRIPE_SECRET_KEY;
+  const key = process.env.LG_STRIPE_SECRET_KEY;
   const signature = request.headers.get('stripe-signature');
   if (!secret || !key) return NextResponse.json({ error: 'Webhook is not configured' }, { status: 503 });
   if (!signature) return NextResponse.json({ error: 'Missing Stripe signature' }, { status: 400 });

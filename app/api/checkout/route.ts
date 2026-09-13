@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   const product = products.find((item) => item.slug === parsed.data.product);
   if (!product) return NextResponse.json({ error: 'Product not found' }, { status: 404 });
   if (product.inventory < 1) return NextResponse.json({ error: 'Out of stock' }, { status: 409 });
-  const key = process.env.STRIPE_SECRET_KEY;
+  const key = process.env.LG_STRIPE_SECRET_KEY;
   if (!key) return NextResponse.json({ error: 'Payments are not configured' }, { status: 503 });
 
   const origin = canonicalOrigin(request.url);

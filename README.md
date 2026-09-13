@@ -5,7 +5,7 @@ A deployable Next.js foundation for a luxury ecommerce operation.
 ## Before accepting orders
 
 1. Provision a relational database. Vercel Postgres is no longer first-party; use Neon through the Vercel Marketplace and set `DATABASE_URL`.
-2. Create Stripe products/prices, set `STRIPE_SECRET_KEY`, and register `https://your-domain/api/webhooks/stripe` with `STRIPE_WEBHOOK_SECRET`.
+2. Create Stripe products/prices, set `LG_STRIPE_SECRET_KEY`, and register `https://your-domain/api/webhooks/stripe` with `STRIPE_WEBHOOK_SECRET`.
 3. Choose an auth provider and protect `/account` and `/admin`; restrict admin access by role.
 4. Choose a shipping/fulfillment and transactional email provider; add their credentials as Vercel environment variables.
 5. Use Vercel Blob for product media. It is first-party; use immutable URLs for updated media.
