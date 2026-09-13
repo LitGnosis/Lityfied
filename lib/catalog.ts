@@ -1,0 +1,3 @@
+export type Product={slug:string;name:string;price:number;description:string;inventory:number};
+export const products:Product[]=[{slug:'atelier-tote',name:'Atelier Tote',price:68000,description:'Hand-finished structured leather carryall.',inventory:8},{slug:'silk-arc-dress',name:'Silk Arc Dress',price:124000,description:'Bias-cut silk with a sculptural neckline.',inventory:4},{slug:'obsidian-watch',name:'Obsidian Watch',price:219000,description:'Swiss automatic movement in a black steel case.',inventory:3}];
+export const money=(cents:number)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(cents/100);

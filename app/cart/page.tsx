@@ -1,0 +1,1 @@
+import Link from 'next/link'; export default function Cart(){return <><p className="eyebrow">Your bag</p><h1>Ready when you are.</h1><p>Cart persistence is connected to the commerce database once configured. Add a piece from the collection to begin.</p><Link className="button" href="/products">Browse collection</Link></>}
