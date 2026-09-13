@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import { money, products } from '@/lib/catalog';
+import { ProductCheckoutLink } from '@/components/CommerceEvents';
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -24,7 +24,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     <p className="eyebrow">{product.inventory} available</p>
     <div className="grid"><div className="image" /><div>
       <h1>{product.name}</h1><p>{product.description}</p><p className="price">{money(product.price)}</p>
-      <Link className="button" href={`/checkout?product=${product.slug}`}>Secure checkout</Link>
+      <ProductCheckoutLink product={product.slug} />
     </div></div>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
   </article>;

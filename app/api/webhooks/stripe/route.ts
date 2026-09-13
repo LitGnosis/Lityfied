@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { track } from '@vercel/analytics/server';
 import { db } from '@/lib/database';
 
 export async function POST(request: NextRequest) {
@@ -48,8 +49,16 @@ export async function POST(request: NextRequest) {
       select exists (select 1 from recorded) as recorded,
              exists (select 1 from created_order) as order_created
     `;
-    return NextResponse.json({ received: true, duplicate: !outcome[0]?.recorded });
 
+    if (outcome[0]?.order_created) {
+      try {
+        await track('payment_completed', { currency: session.currency || 'unknown', product: session.metadata?.productSlug || 'unknown' });
+      } catch {
+        console.error('Payment analytics tracking failed', { eventId: event.id });
+      }
+    }
+
+    return NextResponse.json({ received: true, duplicate: !outcome[0]?.recorded });
   } catch (error) {
     console.error('Stripe webhook persistence failed', { eventId: event.id, type: event.type });
     return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
