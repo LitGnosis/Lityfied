@@ -1,0 +1,1 @@
+export default function Privacy(){return <><h1>Privacy</h1><p>Lityfied collects only information required to process orders, deliver purchases, support clients, and meet legal obligations. Publish reviewed privacy terms with your business contact details before accepting orders.</p></>}

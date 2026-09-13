@@ -1,0 +1,1 @@
+export default function Account(){return <><p className="eyebrow">Client account</p><h1>Your Lityfied account.</h1><p>Sign-in, order history, addresses, and returns are activated through the chosen identity and commerce database provider.</p></>}
