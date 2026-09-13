@@ -1,1 +1,7 @@
-export default function Admin(){return <><p className="eyebrow">Restricted</p><h1>Operations console.</h1><p>This route must be protected by your identity provider before launch. It is the workspace for catalog, inventory, orders, fulfillment, refunds, and returns.</p><ul><li>Inventory: reserve stock during checkout; decrement only after payment succeeds.</li><li>Orders: accept Stripe webhooks idempotently and retain event IDs.</li><li>Fulfillment: create shipping labels only for paid orders.</li><li>Returns: approve and track return state independently of refunds.</li></ul></>}
+import { notFound } from 'next/navigation';
+
+// This boundary prevents accidental publication of operational data until an
+// identity provider and server-side role check are implemented.
+export default function Admin() {
+  notFound();
+}
