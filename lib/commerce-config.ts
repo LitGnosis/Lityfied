@@ -1,6 +1,6 @@
 const requiredCommerceEnvironment = [
   'NEXT_PUBLIC_SITE_URL',
-  'DATABASE_URL',
+  'LG_DATABASE_URL',
   'LG_STRIPE_SECRET_KEY',
   'STRIPE_WEBHOOK_SECRET',
   'AUTH_SECRET',

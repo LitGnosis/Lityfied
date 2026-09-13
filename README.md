@@ -4,7 +4,7 @@ A deployable Next.js foundation for a luxury ecommerce operation.
 
 ## Before accepting orders
 
-1. Provision a relational database. Vercel Postgres is no longer first-party; use Neon through the Vercel Marketplace and set `DATABASE_URL`.
+1. Provision a relational database. Vercel Postgres is no longer first-party; use Neon through the Vercel Marketplace and set `LG_DATABASE_URL`.
 2. Create Stripe products/prices, set `LG_STRIPE_SECRET_KEY`, and register `https://your-domain/api/webhooks/stripe` with `STRIPE_WEBHOOK_SECRET`.
 3. Choose an auth provider and protect `/account` and `/admin`; restrict admin access by role.
 4. Choose a shipping/fulfillment and transactional email provider; add their credentials as Vercel environment variables.
@@ -28,7 +28,7 @@ Copy `.env.example` to `.env.local`, fill local development credentials, then in
 
 The `/api/health` endpoint reports `503` until every required commerce integration is configured. This is intentional: do not enable a custom domain or take live orders until the following are complete.
 
-1. Connect a Neon database through the Vercel Marketplace, apply `db/schema.sql` from an environment with database access, and set `DATABASE_URL`. Vercel Postgres is no longer first-party; existing databases were migrated to Neon through the Marketplace in December 2024.
+1. Connect a Neon database through the Vercel Marketplace, apply `db/schema.sql` from an environment with database access, and set `LG_DATABASE_URL`. Vercel Postgres is no longer first-party; existing databases were migrated to Neon through the Marketplace in December 2024.
 2. Configure Stripe production credentials and a webhook endpoint for `checkout.session.completed`. The webhook must persist `event.id` transactionally before creating an order, reserving/decrementing inventory, sending receipts, or requesting fulfillment.
 3. Replace the static `lib/catalog.ts` data with database reads and implement authenticated customer sessions plus a server-side admin role check. `/account` and `/admin` intentionally return 404 until then.
 4. Connect tax, shipping/labels, transactional email, supplier onboarding/payouts, and fraud-review providers. Their provider-specific credentials must be stored as encrypted Vercel environment variables.
