@@ -1,10 +1,12 @@
 import { notFound } from 'next/navigation';
-import { money, products } from '@/lib/catalog';
+import { getProductBySlug, money } from '@/lib/catalog';
 import { ProductCheckoutLink } from '@/components/CommerceEvents';
+
+export const dynamic = 'force-dynamic';
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = products.find((item) => item.slug === slug);
+  const product = await getProductBySlug(slug);
   if (!product) notFound();
 
   const schema = {
