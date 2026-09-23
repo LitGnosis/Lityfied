@@ -1,0 +1,1 @@
+export default function Terms(){return <><h1>Terms of sale</h1><p>Publish jurisdiction-specific terms covering pricing, fulfillment, returns, warranties, and dispute handling before accepting orders.</p></>}
