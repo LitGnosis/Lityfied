@@ -1,6 +1,7 @@
 import { db } from '@/lib/database';
 
 export type Product = {
+  id: string;
   slug: string;
   name: string;
   price: number;
@@ -9,6 +10,7 @@ export type Product = {
 };
 
 type ProductRow = {
+  id: string;
   slug: string;
   name: string;
   price: number | string;
@@ -18,6 +20,7 @@ type ProductRow = {
 
 function productFromRow(row: ProductRow): Product {
   return {
+    id: row.id,
     slug: row.slug,
     name: row.name,
     price: Number(row.price),
@@ -28,6 +31,7 @@ function productFromRow(row: ProductRow): Product {
 
 const selectProducts = `
   select
+    p.id,
     p.slug,
     p.name,
     p.price_cents as price,

@@ -31,8 +31,8 @@ export async function POST(request: NextRequest) {
     }
 
     const session = event.data.object as Stripe.Checkout.Session;
-    const amount = session.amount_total;
-    if (!session.id || amount === null) throw new Error('Stripe checkout session is missing required order fields');
+    const orderId = session.metadata?.orderId ?? session.client_reference_id;
+    if (!session.id || !orderId) throw new Error('Stripe checkout session is missing its order reference');
 
     const outcome = await sql`
       with recorded as (
@@ -40,18 +40,28 @@ export async function POST(request: NextRequest) {
         values ('stripe', ${event.id})
         on conflict (provider, event_id) do nothing
         returning event_id
-      ), created_order as (
-        insert into orders (id, stripe_session_id, status, subtotal_cents, tax_cents, shipping_cents)
-        select gen_random_uuid(), ${session.id}, 'paid', ${amount}, 0, 0
-        where exists (select 1 from recorded)
-        on conflict (stripe_session_id) do nothing
+      ), paid_order as (
+        update orders
+        set stripe_session_id = ${session.id}, status = 'paid'
+        where id = ${orderId} and status = 'pending' and exists (select 1 from recorded)
         returning id
+      ), consumed_inventory as (
+        update inventory
+        set available = available - order_items.quantity,
+            reserved = reserved - order_items.quantity,
+            updated_at = now()
+        from order_items
+        where order_items.order_id in (select id from paid_order)
+          and inventory.product_id = order_items.product_id
+        returning inventory.product_id
       )
       select exists (select 1 from recorded) as recorded,
-             exists (select 1 from created_order) as order_created
+             exists (select 1 from paid_order) as order_paid,
+             count(*)::int as inventory_items
+      from consumed_inventory
     `;
 
-    if (outcome[0]?.order_created) {
+    if (outcome[0]?.order_paid) {
       try {
         await track('payment_completed', { currency: session.currency || 'unknown', product: session.metadata?.productSlug || 'unknown' });
       } catch {
