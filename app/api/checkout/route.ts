@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProduct } from '../../../lib/catalog';
+import { sql } from '../../../lib/db';
 import { stripe } from '../../../lib/stripe';
 
 export const runtime = 'nodejs';
@@ -8,6 +9,16 @@ type CartLine = { id: number; quantity: number };
 
 export async function POST(request: NextRequest) {
   if (!stripe) return NextResponse.json({ error: 'Payments are not configured.' }, { status: 503 });
+  if (!sql) return NextResponse.json({ error: 'Order processing is not configured.' }, { status: 503 });
+
+  try {
+    const storage = await sql<{ orders: string | null }[]>`SELECT to_regclass('public.orders') AS orders`;
+    if (!storage[0]?.orders) {
+      return NextResponse.json({ error: 'Order processing is not ready.' }, { status: 503 });
+    }
+  } catch {
+    return NextResponse.json({ error: 'Order processing is temporarily unavailable.' }, { status: 503 });
+  }
 
   const body = await request.json().catch(() => null) as { items?: CartLine[] } | null;
   if (!body?.items?.length || body.items.length > 20) {
