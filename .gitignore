@@ -1,4 +1,5 @@
-node_modules
-.next
-*.tsbuildinfo
-.env*
+node_modules/
+.next/
+tsconfig.tsbuildinfo
+next-env.d.ts
+.env.local

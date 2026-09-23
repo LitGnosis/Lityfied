@@ -3,18 +3,16 @@ import { getProducts, money } from '@/lib/catalog';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Home() {
+export default async function Products() {
   const products = await getProducts();
 
   return <>
-    <p className="eyebrow">The new collection</p>
-    <h1>Considered objects for an exceptional everyday.</h1>
-    <Link className="button" href="/products">Shop the collection</Link>
+    <p className="eyebrow">Collection</p>
+    <h1>Permanent pieces, limited quantities.</h1>
     <section className="grid">
       {products.map((product) => <article className="card" key={product.slug}>
         <div className="image" />
         <h2>{product.name}</h2>
-        <p>{product.description}</p>
         <p className="price">{money(product.price)}</p>
         <Link href={`/products/${product.slug}`}>View piece →</Link>
       </article>)}

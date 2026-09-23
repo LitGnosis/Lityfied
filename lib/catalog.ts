@@ -1,17 +1,56 @@
-export type CatalogProduct = {
-  id: number;
+import { db } from '@/lib/database';
+
+export type Product = {
+  id: string;
+  slug: string;
   name: string;
   price: number;
   description: string;
-  color: string;
-  category: string;
+  inventory: number;
 };
 
-export const products: CatalogProduct[] = [
-  { id: 1, name: 'The Everyday Tote', price: 148, description: 'Structured carryall in soft, durable vegan leather.', color: 'sand', category: 'Accessories' },
-  { id: 2, name: 'Cloud Knit Set', price: 128, description: 'A polished matching set designed for effortless days.', color: 'mist', category: 'Apparel' },
-  { id: 3, name: 'Ribbed Glass Set', price: 64, description: 'Four hand-finished glasses for your daily ritual.', color: 'amber', category: 'Home' },
-  { id: 4, name: 'Weekender Duffel', price: 188, description: 'A roomy, refined companion for short escapes.', color: 'ink', category: 'Accessories' },
-];
+type ProductRow = {
+  id: string;
+  slug: string;
+  name: string;
+  price: number | string;
+  description: string;
+  inventory: number | string;
+};
 
-export const getProduct = (id: number) => products.find((product) => product.id === id);
+function productFromRow(row: ProductRow): Product {
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    price: Number(row.price),
+    description: row.description,
+    inventory: Number(row.inventory),
+  };
+}
+
+const selectProducts = `
+  select
+    p.id,
+    p.slug,
+    p.name,
+    p.price_cents as price,
+    p.description,
+    greatest(coalesce(i.available, 0) - coalesce(i.reserved, 0), 0) as inventory
+  from products p
+  left join inventory i on i.product_id = p.id
+  where p.active = true
+`;
+
+export async function getProducts(): Promise<Product[]> {
+  const rows = await db().query(`${selectProducts} order by p.created_at desc`) as ProductRow[];
+  return rows.map(productFromRow);
+}
+
+export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+  const rows = await db().query(`${selectProducts} and p.slug = $1 limit 1`, [slug]) as ProductRow[];
+  return rows[0] ? productFromRow(rows[0]) : undefined;
+}
+
+export const money = (cents: number) =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);

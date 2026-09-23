@@ -1,11 +1,3 @@
-import type { Metadata } from 'next';
-import './globals.css';
-
-export const metadata: Metadata = {
-  title: 'Lityfied | Modern essentials',
-  description: 'A curated collection of elevated everyday goods.',
-};
-
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body>{children}</body></html>;
-}
+import type { Metadata } from 'next'; import { Analytics } from '@vercel/analytics/next'; import './globals.css'; import { Header } from '@/components/Header';
+export const metadata:Metadata={title:{default:'Lityfied | Modern Luxury',template:'%s | Lityfied'},description:'A curated destination for modern luxury.',metadataBase:new URL(process.env.NEXT_PUBLIC_SITE_URL||'http://localhost:3000')};
+export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="en"><body><Header/><main>{children}</main><footer>© {new Date().getFullYear()} Lityfied · <a href="/legal/privacy">Privacy</a> · <a href="/legal/terms">Terms</a></footer><Analytics/></body></html>}
