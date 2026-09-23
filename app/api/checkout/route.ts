@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
   const origin = request.nextUrl.origin;
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
+    customer_creation: 'always',
     billing_address_collection: 'required',
     shipping_address_collection: { allowed_countries: ['US', 'CA'] },
     line_items: lineItems.filter((item): item is NonNullable<typeof item> => item !== null),
