@@ -1,0 +1,39 @@
+{
+  "name": "lityfied-platinum-marketplace",
+  "version": "5.3.1",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "start": "next start",
+    "dev": "next dev",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run preflight && npm test && npm run typecheck && npm run build",
+    "preflight": "node scripts/preflight.mjs",
+    "db:migrate": "node scripts/migrate.mjs",
+    "test": "node --experimental-test-module-mocks --import tsx --test tests/*.test.ts",
+    "db:verify": "node scripts/verify-database.mjs"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^1.5.0",
+    "@vercel/blob": "^2.8.0",
+    "@vercel/speed-insights": "^1.2.0",
+    "next": "16.3.8",
+    "pg": "^8.16.3",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "stripe": "^22.6.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "@types/node": "^24.13.2",
+    "@types/pg": "^8.15.5",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": "24.x"
+  },
+  "type": "module"
+}
