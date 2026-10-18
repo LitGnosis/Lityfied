@@ -1,0 +1,4 @@
+const requiredCommerceEnvironment=['NEXT_PUBLIC_SITE_URL','LG_DATABASE_URL','LG_STRIPE_SECRET_KEY','STRIPE_WEBHOOK_SECRET'] as const;
+export function commerceReadiness(){const missing=requiredCommerceEnvironment.filter(k=>!(k==='LG_STRIPE_SECRET_KEY' ? (process.env.LG_STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY_) : process.env[k]));return{ready:missing.length===0,missing};}
+export function checkoutReadiness(){const missing=['LG_STRIPE_SECRET_KEY'].filter(k=>!(k==='LG_STRIPE_SECRET_KEY' ? (process.env.LG_STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY_) : process.env[k]));return{ready:missing.length===0,missing};}
+export function canonicalOrigin(requestUrl:string){const configured=process.env.NEXT_PUBLIC_SITE_URL;return configured?new URL(configured).origin:new URL(requestUrl).origin;}

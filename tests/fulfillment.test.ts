@@ -1,0 +1,10 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import type Stripe from 'stripe';
+import {paidCart} from '../lib/fulfillment';
+const session=(overrides={})=>({payment_status:'paid',currency:'usd',amount_subtotal:6999,metadata:{integration:'lityfied-v1',cart:'royal-chronograph:1'},...overrides}) as unknown as Stripe.Checkout.Session;
+test('paid storefront cart routes a physical order',()=>assert.equal(paidCart(session())?.[0].quantity,1));
+test('unpaid sessions never fulfill',()=>assert.equal(paidCart(session({payment_status:'unpaid'})),null));
+test('generic Bluevine/link session is not matched',()=>assert.equal(paidCart(session({metadata:{}})),null));
+test('wrong currency or amount is rejected',()=>{assert.throws(()=>paidCart(session({currency:'eur'})));assert.throws(()=>paidCart(session({amount_subtotal:1})));});
+test('unknown products and invalid quantities are rejected',()=>{for(const cart of ['unknown:1','royal-chronograph:0','royal-chronograph:11','royal-chronograph:1.5']) assert.throws(()=>paidCart(session({metadata:{integration:'lityfied-v1',cart}})));});

@@ -1,0 +1,1 @@
+export default function Terms(){return <section className="panel"><p className="eyebrow">TERMS</p><h1 className="pageTitle">Terms of sale</h1><p>Prices and availability may change before checkout. Orders are accepted after successful payment confirmation. Shipping estimates are estimates, and customers are responsible for providing accurate delivery information.</p></section>}

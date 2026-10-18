@@ -1,0 +1,1 @@
+export default function Support(){return <section className="panel"><p className="eyebrow">SUPPORT</p><h1 className="pageTitle">We’re here to help.</h1><p>Add the monitored customer-support email and order-support workflow here before launch. Never ask customers to send payment card numbers by email.</p></section>}

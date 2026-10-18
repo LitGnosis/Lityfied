@@ -1,0 +1,1 @@
+export default function Returns(){return <section className="panel"><p className="eyebrow">RETURNS</p><h1 className="pageTitle">Returns & refunds</h1><p>Publish your final return window, item-condition rules, exclusions, return shipping terms, and refund timing here before accepting live orders. These terms should match your supplier and fulfillment policies.</p></section>}
