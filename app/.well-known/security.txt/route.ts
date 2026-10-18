@@ -1,0 +1,1 @@
+import {NextResponse} from 'next/server';export async function GET(){const email=process.env.NEXT_PUBLIC_SUPPORT_EMAIL||'support@example.invalid';return new NextResponse(`Contact: mailto:${email}\nPreferred-Languages: en\n`,{headers:{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'public, max-age=3600'}})}

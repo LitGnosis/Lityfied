@@ -1,0 +1,2 @@
+import type {MetadataRoute} from 'next';
+export default function manifest():MetadataRoute.Manifest{return{name:'Lityfied Platinum Royal Marketplace',short_name:'Lityfied',description:'Premium marketplace shopping from discovery to delivery. Get Lit. Get Satisfied. Get Lityfied.',start_url:'/',display:'standalone',background_color:'#09050f',theme_color:'#4c1d95',icons:[{src:'/icon.svg',sizes:'any',type:'image/svg+xml'}]}}

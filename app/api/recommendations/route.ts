@@ -1,0 +1,20 @@
+import {NextRequest,NextResponse} from 'next/server';
+import {ensurePlatinumSchema,query} from '../../../lib/db';
+import {currentUser} from '../../../lib/auth';
+const shape=(rows:any[])=>rows.map((x:any)=>({id:x.product_id,name:x.name,image:x.image,price:Number(x.price_cents||0)/100,category:x.category||'Marketplace',supplier:'Lityfied',shipsFrom:'Supplier network',reason:x.reason||undefined}));
+export async function GET(r:NextRequest){
+ try{
+  await ensurePlatinumSchema();const productId=String(r.nextUrl.searchParams.get('productId')||'').slice(0,200),u=await currentUser();let rows:any[]=[];
+  if(productId){
+   const base=(await query<any>(`select category,price_cents from catalog_snapshots where product_id=$1 order by checked_at desc limit 1`,[productId]))[0];
+   if(base){const low=Math.max(0,Math.floor(Number(base.price_cents||0)*.45)),high=Math.max(low+1,Math.ceil(Number(base.price_cents||0)*1.8));rows=await query<any>(`with latest as (select distinct on(product_id) product_id,name,image,price_cents,category,available,checked_at from catalog_snapshots where product_id<>$1 order by product_id,checked_at desc),pop as (select product_id,sum(case event_name when 'purchase' then 10 when 'add_to_cart' then 4 when 'wishlist_add' then 3 when 'product_view' then 1 else 0 end)::int score from analytics_events where created_at>now()-interval '30 days' and product_id is not null group by product_id) select l.*,coalesce(p.score,0) score,'Similar to this item' reason from latest l left join pop p using(product_id) where l.available=true and ($2::text is null or l.category=$2) and l.price_cents between $3 and $4 order by coalesce(p.score,0) desc,l.checked_at desc limit 12`,[productId,base.category||null,low,high])}
+  }
+  if(!rows.length&&u){
+   rows=await query<any>(`with user_scores as (select product_id,sum(case event_name when 'purchase' then 12 when 'add_to_cart' then 5 when 'wishlist_add' then 4 when 'product_view' then 1 else 0 end)::int score from analytics_events where user_id=$1 and product_id is not null and created_at>now()-interval '120 days' group by product_id),fav_cats as (select c.category,sum(s.score)::int cat_score from user_scores s join lateral(select category from catalog_snapshots c where c.product_id=s.product_id order by checked_at desc limit 1)c on true where c.category is not null group by c.category order by cat_score desc limit 5),latest as (select distinct on(product_id) product_id,name,image,price_cents,category,available,checked_at from catalog_snapshots order by product_id,checked_at desc),pop as (select product_id,sum(case event_name when 'purchase' then 10 when 'add_to_cart' then 4 when 'wishlist_add' then 3 when 'product_view' then 1 else 0 end)::int score from analytics_events where created_at>now()-interval '30 days' and product_id is not null group by product_id) select l.*,coalesce(f.cat_score,0)+coalesce(p.score,0) score,'Recommended for you' reason from latest l join fav_cats f on f.category=l.category left join pop p using(product_id) where l.available=true and not exists(select 1 from user_scores us where us.product_id=l.product_id) order by score desc,l.checked_at desc limit 12`,[u.id]);
+  }
+  if(!rows.length){
+   rows=await query<any>(`with latest as (select distinct on(product_id) product_id,name,image,price_cents,category,available,checked_at from catalog_snapshots order by product_id,checked_at desc),pop as (select product_id,sum(case event_name when 'purchase' then 10 when 'add_to_cart' then 4 when 'wishlist_add' then 3 when 'product_view' then 1 else 0 end)::int score from analytics_events where product_id is not null and created_at>now()-interval '14 days' group by product_id) select l.*,coalesce(p.score,0) score,'Trending on Lityfied' reason from latest l left join pop p using(product_id) where l.available=true order by coalesce(p.score,0) desc,l.checked_at desc limit 12`);
+  }
+  return NextResponse.json({products:shape(rows)});
+ }catch(e:any){console.warn('LITYFIED_RECOMMENDATIONS_ERROR',e?.message||e);return NextResponse.json({products:[]})}
+}
