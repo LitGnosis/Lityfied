@@ -1,0 +1,2 @@
+import {products,money} from '@/lib/catalog';import Link from 'next/link';
+export default function Products(){return <><p className="eyebrow">SHOP LITYFIED</p><h1 className="pageTitle">Find your style. Own your vibe.</h1><section className="grid">{products.map(p=><article className="card" key={p.slug}><div className="shine">{p.category}</div><h3>{p.name}</h3><p>{p.description}</p><strong>{money(p.price)}</strong><Link href={`/products/${p.slug}`}>VIEW ITEM</Link></article>)}</section></>}
