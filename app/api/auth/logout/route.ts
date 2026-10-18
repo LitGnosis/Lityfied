@@ -1,0 +1,1 @@
+import {NextRequest,NextResponse} from 'next/server';import {logoutUser} from '../../../../lib/auth';import {sameOrigin} from '../../../../lib/security';export async function POST(r:NextRequest){if(!sameOrigin(r))return NextResponse.json({error:'Invalid request origin.'},{status:403});await logoutUser();return NextResponse.json({ok:true})}
