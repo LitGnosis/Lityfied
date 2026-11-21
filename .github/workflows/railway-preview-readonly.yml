@@ -31,3 +31,18 @@ jobs:
             test "$s" = 403 || { echo "Unsafe POST path $p status $s"; exit 1; }
           done
           echo "PASS: Lityfied full-source Next.js Railway preview is reachable and read-only"
+
+  fulfillment-unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: No-charge Stripe session and fulfillment safety tests
+        run: npx tsx --test tests/fulfillment.test.ts
+      - name: TypeScript static verification
+        run: npm run typecheck
