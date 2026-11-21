@@ -44,5 +44,7 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - name: No-charge Stripe session and fulfillment safety tests
         run: npx tsx --test tests/fulfillment.test.ts
+      - name: Generate Next.js 16 route type declarations
+        run: npx next typegen
       - name: TypeScript static verification
         run: npm run typecheck
