@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: lityfied-phase3-ffmpeg
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    region: ohio
+    plan: standard
+    autoDeploy: false
+    healthCheckPath: /health
+    disk:
+      name: lityfied-render-data
+      mountPath: /data
+      sizeGB: 100
+    envVars:
+      - key: LITYFIED_DATA_DIR
+        value: /data
+      - key: LITYFIED_WORKER_SECRET
+        generateValue: true
+      - key: LITYFIED_CALLBACK_URL
+        value: ""
+      - key: LITYFIED_CALLBACK_SECRET
+        generateValue: true
+      - key: LITYFIED_ALLOWED_MEDIA_HOSTS
+        value: "blob.vercel-storage.com"
