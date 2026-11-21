@@ -140,10 +140,19 @@ def status(job_id:str,req:Request):
     return {"jobId":row["id"],"state":row["status"],"result":json.loads(row["result"]) if row["result"] else None,"error":row["error"],"attempts":row["attempts"]}
 @app.get("/jobs/{job_id}/download")
 def file(job_id:str,req:Request):
-    if not hmac.compare_digest(req.headers.get("authorization",""),"Bearer "+SECRET):raise HTTPException(401)
+    authorized=hmac.compare_digest(req.headers.get("authorization",""),"Bearer "+SECRET)
+    if not authorized:
+        try:
+            expires=int(req.query_params.get("expires","0"))
+            proof=req.query_params.get("signature","")
+            expected=signature(SECRET,f"export|{job_id}|{expires}".encode("utf8"))
+            authorized=time.time()<expires and expires<time.time()+7200 and bool(proof) and hmac.compare_digest(proof,expected)
+        except Exception:
+            authorized=False
+    if not authorized:raise HTTPException(401)
     with connect() as db:row=db.execute("SELECT status,manifest FROM jobs WHERE id=?",(job_id,)).fetchone()
     if not row or row["status"]!="ready":raise HTTPException(404)
     data=json.loads(row["manifest"]);name="master_4k.mp4" if data["resolution"]=="4k" else "master_preview.mp4"
     path=(ROOT/"jobs"/job_id/"export"/name).resolve()
     if not path.is_relative_to(ROOT) or not path.exists():raise HTTPException(404)
-    return FileResponse(path,media_type="video/mp4",filename=name)
+    return FileResponse(path,media_type="video/mp4",filename=name,content_disposition_type="attachment" if req.query_params.get("download")=="1" else "inline")
