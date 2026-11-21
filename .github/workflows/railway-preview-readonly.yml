@@ -1,0 +1,33 @@
+name: Railway Lityfied read-only preview smoke tests
+on:
+  push:
+    branches:
+      - migration/railway-full-lityfied-readonly-20261121
+permissions:
+  contents: read
+jobs:
+  live-preview-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      SITE_URL: https://lityfied-web-migration-production.up.railway.app
+    steps:
+      - name: Verify storefront pages, noindex and blocked API operations
+        shell: bash
+        run: |
+          set -euo pipefail
+          response=$(curl --retry 4 --retry-all-errors --retry-delay 3 -sS -D /tmp/headers -o /tmp/home -w '%{http_code}' "$SITE_URL/")
+          test "$response" = 200 || { echo "Root status $response"; exit 1; }
+          grep -qiE 'noindex' /tmp/headers
+          grep -qiE '<html' /tmp/home
+          for p in /products /cart /support; do
+            s=$(curl -sS -o /dev/null -w '%{http_code}' "$SITE_URL$p")
+            test "$s" = 200 || { echo "Page $p status $s"; exit 1; }
+          done
+          for p in /api/webhooks/stripe /api/fulfillment /api/checkout; do
+            s=$(curl -sS -o /dev/null -w '%{http_code}' "$SITE_URL$p")
+            test "$s" = 403 || { echo "Unsafe GET path $p status $s"; exit 1; }
+            s=$(curl -sS -X POST -H 'Content-Type: application/json' -d '{}' -o /dev/null -w '%{http_code}' "$SITE_URL$p")
+            test "$s" = 403 || { echo "Unsafe POST path $p status $s"; exit 1; }
+          done
+          echo "PASS: Lityfied full-source Next.js Railway preview is reachable and read-only"
