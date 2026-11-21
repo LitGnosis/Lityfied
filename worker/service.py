@@ -23,6 +23,8 @@ def connect():
 def init_db():
     with connect() as db:
         db.execute("CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY, manifest TEXT NOT NULL, status TEXT NOT NULL, result TEXT, error TEXT, attempts INTEGER DEFAULT 0, updated REAL NOT NULL)")
+        cols=[x[1] for x in db.execute("PRAGMA table_info(jobs)").fetchall()]
+        if "callback_delivered" not in cols:db.execute("ALTER TABLE jobs ADD COLUMN callback_delivered INTEGER DEFAULT 0")
         db.execute("UPDATE jobs SET status='queued' WHERE status IN ('downloading','stitching')")
 def signature(secret,data):
     return hmac.new(secret.encode("utf8"),data,hashlib.sha256).hexdigest()
@@ -74,12 +76,19 @@ def update(jid,status,result=None,error=None):
     with connect() as db:
         db.execute("UPDATE jobs SET status=?,result=COALESCE(?,result),error=?,updated=? WHERE id=?",(status,result,error,time.time(),jid))
 def callback(jid,status,result=None,error=None):
-    if not CALLBACK_URL or not CALLBACK_SECRET:return
-    payload=json.dumps({"jobId":jid,"status":status,"result":result,"error":error},separators=(",",":")).encode()
+    if not CALLBACK_URL or not CALLBACK_SECRET:return False
+    if isinstance(result,dict) and isinstance(result.get("durationSeconds"),float) and result["durationSeconds"].is_integer():
+        result={**result,"durationSeconds":int(result["durationSeconds"])}
+    payload=json.dumps({"jobId":jid,"status":status,"result":result,"error":error},separators=(",",":"),allow_nan=False).encode()
     try:
         with httpx.Client(timeout=15) as c:
             c.post(CALLBACK_URL,content=payload,headers={"Content-Type":"application/json","X-Lityfied-Signature":"sha256="+signature(CALLBACK_SECRET,payload)}).raise_for_status()
-    except Exception as e:print("Callback deferred:",str(e)[:120],flush=True)
+        if status in ("ready","failed"):
+            with connect() as db:db.execute("UPDATE jobs SET callback_delivered=1 WHERE id=?",(jid,))
+        return True
+    except Exception as e:
+        print("Callback deferred:",str(e)[:180],flush=True)
+        return False
 def process_job(jid,data):
     from .stitch import stitch
     home=(ROOT/"jobs"/jid).resolve()
@@ -107,7 +116,14 @@ def work_loop():
             with connect() as db:
                 row=db.execute("SELECT id,manifest FROM jobs WHERE status='queued' ORDER BY updated LIMIT 1").fetchone()
                 if row:db.execute("UPDATE jobs SET status='downloading',attempts=attempts+1,updated=? WHERE id=?",(time.time(),row["id"]))
-            if not row:time.sleep(3);continue
+            if not row:
+                with connect() as db:
+                    pending=db.execute("SELECT id,status,result,error FROM jobs WHERE status IN ('ready','failed') AND callback_delivered=0 ORDER BY updated LIMIT 1").fetchone()
+                if pending:
+                    callback(pending["id"],pending["status"],result=json.loads(pending["result"]) if pending["result"] else None,error=pending["error"])
+                    time.sleep(10)
+                else:time.sleep(3)
+                continue
             try:process_job(row["id"],json.loads(row["manifest"]))
             except Exception as e:
                 msg=str(e)[:300];update(row["id"],"failed",error=msg);callback(row["id"],"failed",error=msg)
