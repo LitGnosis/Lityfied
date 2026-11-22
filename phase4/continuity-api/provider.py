@@ -25,7 +25,9 @@ def api_base():
 
 def price_for(mode:str,duration:int)->Decimal:
     value=os.getenv(RATES[mode], '')
-    if not value:raise RuntimeError('Provider rate not verified; rendering is disabled')
+    if not value:
+        if os.getenv('PROVIDER_SUBMISSIONS_ENABLED','false') != 'true': return Decimal('0')
+        raise RuntimeError('Provider rate not verified; rendering is disabled')
     unit=Decimal(value)
     if unit<=0 or unit>=Decimal('10'):raise RuntimeError('Invalid provider rate')
     return (unit*Decimal(duration)).quantize(Decimal('0.000001'))
