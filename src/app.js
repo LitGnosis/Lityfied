@@ -1,0 +1,7 @@
+const $=id=>document.getElementById(id);let csrf='',wid='',workspaces=[],signup=true;
+function show(id,on){$(id).classList.toggle('hidden',!on)}
+async function req(path,method='GET',body){const headers={...(csrf?{'x-csrf-token':csrf}:{}),...(wid?{'x-workspace-id':wid}:{})};if(body)headers['content-type']='application/json';const r=await fetch('/api/'+path,{method,headers,credentials:'same-origin',body:body?JSON.stringify(body):undefined});const data=await r.json();if(!r.ok)throw Error(data.error||'Request failed');return data}
+function auth(register){signup=register;show('modal',true);$('authTitle').textContent=register?'Create your workspace':'Welcome back';show('workspaceLabel',register);$('workspaceName').required=register;$('toggle').textContent=register?'Already have an account? Sign in':'New here? Create an account';$('authError').textContent=''}
+$('login').onclick=()=>auth(false);$('register').onclick=$('getstarted').onclick=()=>auth(true);document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>auth(true));$('toggle').onclick=()=>auth(!signup);$('close').onclick=()=>show('modal',false);
+$('authForm').onsubmit=async e=>{e.preventDefault();$('authError').textContent='';try{await req(signup?'register':'login','POST',{email:$('email').value,password:$('pass').value,workspace:$('workspaceName').value});show('modal',false);await load()}catch(x){$('authError').textContent=x.message}};
+async function load(){try{const s=await req('me');csrf=s.csrf;workspaces=s.workspa¶»§q«^

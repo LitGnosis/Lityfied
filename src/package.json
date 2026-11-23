@@ -1,0 +1,1 @@
+{"name":"lityfied-growth-studio","version":"1.0.1","type":"module","private":true,"engines":{"node":"22.x"},"dependencies":{"@neondatabase/serverless":"^1.0.2","@upstash/qstash":"^2.9.0"}}
