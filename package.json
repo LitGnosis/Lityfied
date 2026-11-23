@@ -1,0 +1,16 @@
+{
+  "name": "lityfied-render-preview",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "@upstash/qstash": "^2.9.0"
+  }
+}
