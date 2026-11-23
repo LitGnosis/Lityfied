@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: lityfied-render-preview
+    runtime: node
+    plan: free
+    region: ohio
+    repo: https://github.com/LitGnosis/Lityfied
+    branch: render-preview-20261123
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    autoDeployTrigger: off
+    domains:
+      - lityfied.com
